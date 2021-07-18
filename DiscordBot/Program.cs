@@ -12,6 +12,7 @@ using DSharpPlus.VoiceNext;
 using DSharpPlus.Net;
 using DSharpPlus.Lavalink;
 using Microsoft.Extensions.Logging;
+using Victoria;
 
 namespace DiscordBot
 {
