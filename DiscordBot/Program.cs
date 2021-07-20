@@ -1,18 +1,11 @@
 ﻿using DSharpPlus;
-using System;
 using System.Threading.Tasks;
 using System.Configuration;
-using System.Collections.Specialized;
-using DiscordBot.Back;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 using DSharpPlus.VoiceNext;
 using DSharpPlus.Net;
 using DSharpPlus.Lavalink;
 using Microsoft.Extensions.Logging;
-using Victoria;
 
 namespace DiscordBot
 {
