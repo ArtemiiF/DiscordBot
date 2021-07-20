@@ -30,7 +30,7 @@ namespace DiscordBot
             var endpoint = new ConnectionEndpoint
             {
                 Hostname = "127.0.0.1",
-                Port = 0083
+                Port = 2333
             };
 
             var lavalinkConfig = new LavalinkConfiguration
