@@ -5,18 +5,25 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace DiscordBot.Back.VoiceChannel
 {
     class VoiceChannel
     {
         static public bool inChannelFlag = false;
+
         public async static Task JoinChannel(CommandContext ctx)
         {
+            Console.WriteLine("Join command");
+
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.RespondAsync("You are not in a voice channel.");
+                return;
+            }
 
             if (inChannelFlag)
                 return;
-
-            Console.WriteLine("Join command");
 
             var channel = ctx.Member.VoiceState.Channel;
 
@@ -43,6 +50,13 @@ namespace DiscordBot.Back.VoiceChannel
         public async static Task LeaveChannel(CommandContext ctx)
         {
             Console.WriteLine("Leave command");
+
+            if (!inChannelFlag)
+            {
+                await ctx.RespondAsync("I'm not in channel ;-)");
+                return;
+            }
+
             var channel = ctx.Member.VoiceState.Channel;
             var lava = ctx.Client.GetLavalink();
 
@@ -72,6 +86,5 @@ namespace DiscordBot.Back.VoiceChannel
             await ctx.RespondAsync($"Left {channel.Name}!");
             inChannelFlag = false;
         }
-
     }
 }

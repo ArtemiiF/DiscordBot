@@ -4,15 +4,16 @@ using System.Threading.Tasks;
 using DiscordBot.Back;
 using DiscordBot.Back.VoiceChannel;
 
+
 namespace DiscordBot.Commands
 {
     public class Commands : BaseCommandModule
     {
-
         [Command("h")]
         public async Task HelpCommand(CommandContext ctx)
         {
-            await ctx.RespondAsync("\\play,\\p <YouTube link> - play video from YouTube(audio)");
+            await ctx.RespondAsync("\\play,\\p <YouTube link> - play video from YouTube(audio)\n" +
+                                   "\\stop - stop\\resume track\n\\skip,\\s - skip track\n\\leave,\\l - leave voicechannel");
         }
 
         [Command("join"), Aliases("j")]

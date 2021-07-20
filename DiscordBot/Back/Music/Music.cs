@@ -1,7 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
-using Emzi0767.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +12,21 @@ namespace DiscordBot.Back
     class Music
     {
         private static bool pauseFlag = false;
+        private static bool queueHandlerFlag = true;
         private static List<LavalinkTrack> lavalinkTracks = new List<LavalinkTrack>();
-        
+
+        private async static Task QueueMusicHandler(LavalinkGuildConnection sender, TrackFinishEventArgs e)
+        {
+            if (lavalinkTracks.Count > 0)
+                lavalinkTracks.RemoveAt(0);
+
+            if (lavalinkTracks.Count > 0)
+                await sender.PlayAsync(lavalinkTracks[0]);
+        }
+
         public async static Task PlayMusic(CommandContext ctx, string link)
         {
-            await VoiceChannel.VoiceChannel.JoinChannel(ctx);
+            Console.WriteLine("PlayMusic");
 
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
@@ -25,13 +34,20 @@ namespace DiscordBot.Back
                 return;
             }
 
+            await VoiceChannel.VoiceChannel.JoinChannel(ctx);
+
             var lava = ctx.Client.GetLavalink();
             var node = lava.ConnectedNodes.Values.First();
             var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
 
             if (conn != null)
             {
-                conn.PlaybackFinished += QueueMusic;
+                if (queueHandlerFlag)
+                {
+                    conn.PlaybackFinished += QueueMusicHandler;
+                    queueHandlerFlag = false;
+                }
+
                 var loadResult = await node.Rest.GetTracksAsync(link);
                 
                 if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed
@@ -58,17 +74,16 @@ namespace DiscordBot.Back
             await VoiceChannel.VoiceChannel.JoinChannel(ctx);
         }
 
-        private async static Task QueueMusic(LavalinkGuildConnection sender, TrackFinishEventArgs e)
-        {
-            if(lavalinkTracks.Count > 0)
-                lavalinkTracks.RemoveAt(0);
-
-            if (lavalinkTracks.Count > 0)
-                await sender.PlayAsync(lavalinkTracks[0]);
-        }
-
         public async static Task SkipMusic(CommandContext ctx)
         {
+            Console.WriteLine("SkipMusic");
+
+            if(lavalinkTracks.Count == 0 || ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.RespondAsync("Nothing to skip and/or you are not in voicechannel");
+                return;
+            }
+
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
                 await ctx.RespondAsync("You are not in a voice channel.");
@@ -81,10 +96,19 @@ namespace DiscordBot.Back
 
             await conn.StopAsync();
             await ctx.RespondAsync("Track skipped");
+           
+            pauseFlag = false;
         }
 
         public async static Task StopMusic(CommandContext ctx)
         {
+            Console.WriteLine("StopMusic");
+            if(lavalinkTracks.Count == 0)
+            {
+                await ctx.RespondAsync("No track to stop/resume");
+                return;
+            }
+
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
                 await ctx.RespondAsync("You are not in a voice channel.");
@@ -106,6 +130,5 @@ namespace DiscordBot.Back
                 pauseFlag = false;
             }                
         }
-     
     }
 }
